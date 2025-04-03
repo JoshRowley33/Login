@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shift Sign-On</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(to right, #d4edda, #70c285);
+            margin: 0;
+            padding: 0;
+            color: #064635;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 30px;
+            background: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        #login {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        input, select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            font-size: 1rem;
+            min-width: 200px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 0.95rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #3e8e41;
+        }
+
+        .shift {
+            background: #f4f4f4;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .shift strong:first-child {
+            font-size: 1.2rem;
+            display: block;
+            margin-bottom: 10px;
+            color: #064635;
+        }
+
+        .role-section {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .role-section:last-child {
+            border-bottom: none;
+        }
+
+        .role-section-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #064635;
+        }
+
+        .signed-users {
+            font-size: 0.9rem;
+            margin: 5px 0;
+            color: #333;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .clear-shift-btn {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Shift Sign-On</h1>
+        <div id="login">
+            <input type="text" id="username" placeholder="Enter your name">
+            <select id="role">
+                <option value="OSM">OSM</option>
+                <option value="FirstResponders">First Responders</option>
+                <option value="CRU">CRU</option>
+                <option value="NQFR">NQFR</option>
+            </select>
+        </div>
+        <div id="shifts"></div>
+    </div>
+
+    <script>
+        const shifts = [
+            { date: "Fri Mar 28 2025", OSM: 1, FirstResponders: 6, CRU: 2, NQFR: 4, signedOn: { OSM: [], FirstResponders: [], CRU: [], NQFR: [] } },
+            { date: "Fri Apr 04 2025", OSM: 1, FirstResponders: 6, CRU: 2, NQFR: 4, signedOn: { OSM: [], FirstResponders: [], CRU: [], NQFR: [] } }
+        ];
+
+        function renderShifts() {
+            const shiftContainer = document.getElementById("shifts");
+            shiftContainer.innerHTML = "";
+            shifts.forEach((shift, index) => {
+                const shiftDiv = document.createElement("div");
+                shiftDiv.className = "shift";
+                shiftDiv.innerHTML = `
+                    <strong>${shift.date}</strong>
+                    <div class="role-section">
+                        <div class="role-section-title">OSM (${shift.signedOn.OSM.length}/${shift.OSM})</div>
+                        <div class="signed-users">${shift.signedOn.OSM.join('<br>') || '<i>None signed on</i>'}</div>
+                        <div class="button-group">
+                            <button onclick="signOn(${index}, 'OSM')">Sign On</button>
+                            <button onclick="signOff(${index}, 'OSM')">Sign Off</button>
+                        </div>
+                    </div>
+                    <div class="role-section">
+                        <div class="role-section-title">First Responders (${shift.signedOn.FirstResponders.length}/${shift.FirstResponders})</div>
+                        <div class="signed-users">${shift.signedOn.FirstResponders.join('<br>') || '<i>None signed on</i>'}</div>
+                        <div class="button-group">
+                            <button onclick="signOn(${index}, 'FirstResponders')">Sign On</button>
+                            <button onclick="signOff(${index}, 'FirstResponders')">Sign Off</button>
+                        </div>
+                    </div>
+                    <div class="role-section">
+                        <div class="role-section-title">CRU (${shift.signedOn.CRU.length}/${shift.CRU})</div>
+                        <div class="signed-users">${shift.signedOn.CRU.join('<br>') || '<i>None signed on</i>'}</div>
+                        <div class="button-group">
+                            <button onclick="signOn(${index}, 'CRU')">Sign On</button>
+                            <button onclick="signOff(${index}, 'CRU')">Sign Off</button>
+                        </div>
+                    </div>
+                    <div class="role-section">
+                        <div class="role-section-title">NQFR (${shift.signedOn.NQFR.length}/${shift.NQFR})</div>
+                        <div class="signed-users">${shift.signedOn.NQFR.join('<br>') || '<i>None signed on</i>'}</div>
+                        <div class="button-group">
+                            <button onclick="signOn(${index}, 'NQFR')">Sign On</button>
+                            <button onclick="signOff(${index}, 'NQFR')">Sign Off</button>
+                        </div>
+                    </div>
+                    <button class="clear-shift-btn" onclick="clearShift(${index})">Clear Shift</button>
+                `;
+                shiftContainer.appendChild(shiftDiv);
+            });
+        }
+
+        function signOn(index, role) {
+            const username = document.getElementById("username").value.trim();
+            if (!username) return alert("Enter your name first.");
+            if (!shifts[index].signedOn[role].includes(username)) {
+                shifts[index].signedOn[role].push(username);
+                renderShifts();
+            }
+        }
+
+        function signOff(index, role) {
+            const username = document.getElementById("username").value.trim();
+            shifts[index].signedOn[role] = shifts[index].signedOn[role].filter(u => u !== username);
+            renderShifts();
+        }
+
+        function clearShift(index) {
+            Object.keys(shifts[index].signedOn).forEach(role => shifts[index].signedOn[role] = []);
+            renderShifts();
+        }
+
+        renderShifts();
+    </script>
+</body>
+
+</html>
